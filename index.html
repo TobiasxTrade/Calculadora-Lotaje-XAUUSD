@@ -69,7 +69,6 @@
     }
 
     .card-body{padding:18px}
-
     .calc-shell{display:grid;gap:18px}
 
     .calc-header{
@@ -99,40 +98,6 @@
     .card-sub{
       font-size:13px;
       color:var(--muted);
-    }
-
-    .status-row{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      align-items:center;
-      margin-top:8px;
-    }
-
-    .status-chip{
-      padding:8px 12px;
-      border-radius:999px;
-      border:1px solid rgba(255,255,255,.08);
-      font-size:12px;
-      font-weight:700;
-    }
-
-    .status-chip.online{
-      background:rgba(22,197,109,.12);
-      color:#baffd8;
-      border-color:rgba(22,197,109,.22);
-    }
-
-    .status-chip.offline{
-      background:rgba(239,68,68,.12);
-      color:#ffd0d0;
-      border-color:rgba(239,68,68,.22);
-    }
-
-    .status-chip.sync{
-      background:rgba(103,165,255,.12);
-      color:#d8e9ff;
-      border-color:rgba(103,165,255,.22);
     }
 
     .calc-global{
@@ -349,11 +314,6 @@
           <div>
             <div class="calc-title">XAUUSD · Calculadora de lotaje</div>
             <div class="card-sub">Pip value $10 por lote · 1 lote × 10 pips = $100</div>
-            <div class="status-row">
-              <div class="status-chip online" id="connection-status">Conectando…</div>
-              <div class="status-chip sync" id="sync-status">Sincronización manual</div>
-              <button class="ghost-btn" onclick="manualSync()">Sincronizar ahora</button>
-            </div>
           </div>
           <div class="calc-badge">Gold / USD</div>
         </div>
@@ -366,7 +326,7 @@
                 type="number"
                 id="sl-global"
                 class="pf-input big-input"
-                min="25"
+                min="20"
                 max="500"
                 value="50"
                 step="5"
@@ -377,10 +337,10 @@
 
           <div>
             <div class="card-sub">Rango válido</div>
-            <div style="font-size:18px;font-weight:800;color:#fff;margin-top:4px">25 – 500 pips</div>
+            <div style="font-size:18px;font-weight:800;color:#fff;margin-top:4px">20 – 500 pips</div>
           </div>
 
-          <div class="calc-warn" id="sl-warn">SL fuera de rango (25–500)</div>
+          <div class="calc-warn" id="sl-warn">SL fuera de rango (20–500)</div>
         </div>
 
         <div class="calc-grid" id="lot-grid"></div>
@@ -406,8 +366,6 @@
     const BALANCES = [5000, 10000, 15000, 20000, 25000, 50000, 100000, 200000];
     const PIP_VAL = 10;
 
-    let isSyncing = false;
-
     const lotState = {};
     LOT_FIRMS.forEach(f => {
       lotState[f.id] = {
@@ -426,16 +384,6 @@
       el.classList.add('show');
       clearTimeout(window.__toastTimer);
       window.__toastTimer = setTimeout(() => el.classList.remove('show'), 2500);
-    }
-
-    function setConnectionStatus(text, online = true) {
-      const el = document.getElementById('connection-status');
-      el.textContent = text;
-      el.className = `status-chip ${online ? 'online' : 'offline'}`;
-    }
-
-    function setSyncStatus(text) {
-      document.getElementById('sync-status').textContent = text;
     }
 
     function saveOfflineCache() {
@@ -680,7 +628,6 @@
         toast('Configuración guardada');
       } catch (err) {
         console.error(err);
-        setConnectionStatus('Modo offline activo', false);
         toast('Configuración guardada solo offline', false);
       }
     }
@@ -704,7 +651,6 @@
         toast('Saldo actualizado');
       } catch (err) {
         console.error(err);
-        setConnectionStatus('Modo offline activo', false);
         toast('Saldo guardado solo offline', false);
       }
     }
@@ -740,7 +686,6 @@
           toast('Riesgo actualizado');
         } catch (err) {
           console.error(err);
-          setConnectionStatus('Modo offline activo', false);
           toast('Riesgo guardado solo offline', false);
         }
       }
@@ -754,7 +699,7 @@
       const sl = getSL();
 
       document.getElementById('sl-warn').style.display =
-        (sl < 25 || sl > 200) ? 'block' : 'none';
+        (sl < 20 || sl > 500) ? 'block' : 'none';
 
       LOT_FIRMS.forEach(f => recalcLot(f.id));
       saveOfflineCache();
@@ -785,61 +730,26 @@
       try {
         await loadRemoteData();
         buildLotCards();
-        setConnectionStatus('Conectado a Google Sheets', true);
         if (successMsg) toast(successMsg);
       } catch (err) {
         console.error('SYNC ERROR:', err);
-
-        const hasOffline = hydrateFromOfflineCache();
+        hydrateFromOfflineCache();
         buildLotCards();
-        setConnectionStatus(hasOffline ? 'Modo offline activo' : 'Sin conexión remota', false);
-
         if (successMsg) toast('No se pudo sincronizar remoto', false);
       }
     }
-
-    async function manualSync() {
-      if (isSyncing) return;
-
-      isSyncing = true;
-      setSyncStatus('Sincronizando…');
-
-      try {
-        await refreshRemoteAndRender('Sincronización completada');
-      } finally {
-        isSyncing = false;
-        setSyncStatus('Sincronización manual');
-      }
-    }
-
-    window.addEventListener('online', () => {
-      setConnectionStatus('Conectado a Google Sheets', true);
-      manualSync();
-    });
-
-    window.addEventListener('offline', () => {
-      setConnectionStatus('Modo offline activo', false);
-    });
 
     document.getElementById('sl-global').addEventListener('input', () => recalcAllLots(false));
     document.getElementById('sl-global').addEventListener('change', () => recalcAllLots(true));
 
     (async function init() {
       try {
-        const hadOffline = hydrateFromOfflineCache();
+        hydrateFromOfflineCache();
         buildLotCards();
-
-        if (hadOffline) {
-          setConnectionStatus('Cargando caché local…', false);
-        } else {
-          setConnectionStatus('Cargando datos…', true);
-        }
-
-        await refreshRemoteAndRender(hadOffline ? 'Sincronizado con remoto' : 'Datos cargados desde Google Sheets');
+        await refreshRemoteAndRender('Datos cargados desde Google Sheets');
       } catch (err) {
         console.error('INIT ERROR:', err);
         buildLotCards();
-        setConnectionStatus('Error de carga en este dispositivo', false);
         toast('La app cargó en modo seguro', false);
       }
     })();
