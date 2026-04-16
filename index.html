@@ -29,6 +29,7 @@
     }
 
     *{box-sizing:border-box;margin:0;padding:0}
+
     body{
       font-family:Inter,system-ui,sans-serif;
       background:
@@ -39,6 +40,7 @@
       min-height:100vh;
       overflow-x:hidden;
     }
+
     body::before{
       content:"";
       position:fixed;
@@ -52,126 +54,10 @@
       mask-image:radial-gradient(circle at center, black, transparent 85%);
     }
 
-    .container{max-width:1280px;margin:0 auto;padding:16px}
-
-    .topbar{
-      position:sticky;
-      top:0;
-      z-index:50;
-      backdrop-filter:blur(16px);
-      background:rgba(7,9,15,.88);
-      border-bottom:1px solid var(--line);
-    }
-    .topbar-inner{
+    .container{
       max-width:1280px;
       margin:0 auto;
-      padding:14px 16px;
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:16px;
-      flex-wrap:wrap;
-    }
-
-    .brand{
-      display:flex;
-      align-items:center;
-      gap:14px;
-      min-width:0;
-    }
-    .brand-mark{
-      width:52px;height:52px;border-radius:16px;
-      display:grid;place-items:center;
-      background:linear-gradient(135deg, rgba(213,177,91,.18), rgba(213,177,91,.06));
-      border:1px solid rgba(213,177,91,.22);
-      box-shadow:0 0 0 1px rgba(255,255,255,.03) inset,0 12px 30px rgba(213,177,91,.12);
-      font-size:22px;color:var(--gold-2);
-      flex:0 0 auto;
-    }
-    .brand h1{
-      font-family:Cinzel,serif;
-      font-size:20px;
-      letter-spacing:.03em;
-      color:var(--gold-2);
-      line-height:1.15;
-    }
-    .brand p{
-      font-family:JetBrains Mono,monospace;
-      font-size:10px;
-      letter-spacing:.14em;
-      color:var(--muted);
-      text-transform:uppercase;
-      margin-top:3px;
-    }
-
-    .top-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-
-    .hero{
-      margin:18px 0 16px;
-    }
-    .hero-copy{
-      background:linear-gradient(180deg, rgba(18,23,36,.94), rgba(10,14,22,.98));
-      border:1px solid var(--line);
-      border-radius:24px;
-      box-shadow:var(--shadow);
-      position:relative;
-      padding:22px;
-      overflow:hidden;
-    }
-    .hero-copy::before{
-      content:"";
-      position:absolute;
-      inset:auto -30% -40% auto;
-      width:320px;
-      height:320px;
-      border-radius:50%;
-      background:radial-gradient(circle, rgba(213,177,91,.14), transparent 70%);
-      pointer-events:none;
-    }
-    .eyebrow{
-      font:700 10px JetBrains Mono,monospace;
-      letter-spacing:.16em;
-      text-transform:uppercase;
-      color:var(--gold-2);
-      margin-bottom:10px;
-    }
-    .hero-title{
-      font-family:Cinzel,serif;
-      font-size:clamp(24px,4vw,32px);
-      line-height:1.15;
-      color:#fff;
-    }
-    .hero-title span{color:var(--gold-2)}
-    .card-sub{font-size:13px;color:var(--muted)}
-
-    .status-row{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      margin-top:16px;
-      align-items:center;
-    }
-    .status-chip{
-      padding:8px 12px;
-      border-radius:999px;
-      border:1px solid rgba(255,255,255,.08);
-      font-size:12px;
-      font-weight:700;
-    }
-    .status-chip.online{
-      background:rgba(22,197,109,.12);
-      color:#baffd8;
-      border-color:rgba(22,197,109,.22);
-    }
-    .status-chip.offline{
-      background:rgba(239,68,68,.12);
-      color:#ffd0d0;
-      border-color:rgba(239,68,68,.22);
-    }
-    .status-chip.sync{
-      background:rgba(103,165,255,.12);
-      color:#d8e9ff;
-      border-color:rgba(103,165,255,.22);
+      padding:20px 16px;
     }
 
     .card{
@@ -181,9 +67,11 @@
       box-shadow:var(--shadow);
       overflow:hidden;
     }
+
     .card-body{padding:18px}
 
     .calc-shell{display:grid;gap:18px}
+
     .calc-header{
       display:flex;
       justify-content:space-between;
@@ -191,11 +79,13 @@
       gap:12px;
       flex-wrap:wrap;
     }
+
     .calc-title{
       font-family:Cinzel,serif;
       font-size:24px;
       color:var(--gold-2);
     }
+
     .calc-badge{
       font:700 11px JetBrains Mono,monospace;
       letter-spacing:.08em;
@@ -204,6 +94,45 @@
       background:rgba(213,177,91,.10);
       border:1px solid rgba(213,177,91,.24);
       color:var(--gold-2);
+    }
+
+    .card-sub{
+      font-size:13px;
+      color:var(--muted);
+    }
+
+    .status-row{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+      margin-top:8px;
+    }
+
+    .status-chip{
+      padding:8px 12px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.08);
+      font-size:12px;
+      font-weight:700;
+    }
+
+    .status-chip.online{
+      background:rgba(22,197,109,.12);
+      color:#baffd8;
+      border-color:rgba(22,197,109,.22);
+    }
+
+    .status-chip.offline{
+      background:rgba(239,68,68,.12);
+      color:#ffd0d0;
+      border-color:rgba(239,68,68,.22);
+    }
+
+    .status-chip.sync{
+      background:rgba(103,165,255,.12);
+      color:#d8e9ff;
+      border-color:rgba(103,165,255,.22);
     }
 
     .calc-global{
@@ -216,6 +145,15 @@
       background:linear-gradient(180deg, rgba(255,255,255,.028), rgba(255,255,255,.012));
       border:1px solid var(--line);
     }
+
+    .eyebrow{
+      font:700 10px JetBrains Mono,monospace;
+      letter-spacing:.16em;
+      text-transform:uppercase;
+      color:var(--gold-2);
+      margin-bottom:10px;
+    }
+
     .big-input{
       width:120px;
       font-size:32px;
@@ -223,6 +161,7 @@
       font-weight:800;
       color:var(--gold-2);
     }
+
     .calc-warn{
       display:none;
       font-size:12px;
@@ -244,22 +183,26 @@
       padding:12px 13px;
       font-size:14px;
     }
+
     .ghost-btn,.primary-btn{
       width:auto;
       cursor:pointer;
       transition:.2s ease;
       font-weight:700;
     }
+
     .primary-btn{
       background:linear-gradient(135deg, rgba(213,177,91,.24), rgba(213,177,91,.12));
       color:var(--gold-2);
       border:1px solid rgba(213,177,91,.26);
     }
+
     .ghost-btn{
       background:rgba(255,255,255,.03);
       color:var(--text);
       border:1px solid rgba(255,255,255,.08);
     }
+
     .primary-btn:hover,.ghost-btn:hover{
       transform:translateY(-1px);
     }
@@ -268,6 +211,7 @@
       background:#0f1523;
       color:#eef3ff;
     }
+
     select option{
       background:#0f1523;
       color:#eef3ff;
@@ -286,10 +230,12 @@
       overflow:hidden;
       box-shadow:var(--shadow);
     }
+
     .lot-head{
       padding:16px 16px 14px;
       border-top:3px solid var(--lot-accent);
     }
+
     .lot-head-top{
       display:flex;
       justify-content:space-between;
@@ -297,13 +243,18 @@
       align-items:center;
       margin-bottom:14px;
     }
+
     .lot-title-input{
       font-weight:800;
       font-size:18px;
       background:rgba(255,255,255,.03)!important;
     }
 
-    .field-group{display:grid;gap:8px}
+    .field-group{
+      display:grid;
+      gap:8px;
+    }
+
     .field-label{
       font:700 11px JetBrains Mono,monospace;
       letter-spacing:.1em;
@@ -317,6 +268,7 @@
       border-top:1px solid var(--line);
       text-align:center;
     }
+
     .lot-number{
       font-size:32px;
       line-height:1.05;
@@ -324,6 +276,7 @@
       color:var(--lot-accent);
       word-break:break-word;
     }
+
     .lot-mini{
       display:flex;
       justify-content:center;
@@ -331,6 +284,7 @@
       flex-wrap:wrap;
       margin-top:12px;
     }
+
     .lot-pill{
       font-size:12px;
       padding:5px 10px;
@@ -340,7 +294,11 @@
       color:var(--muted);
     }
 
-    .risk-buttons{display:flex;gap:6px}
+    .risk-buttons{
+      display:flex;
+      gap:6px;
+    }
+
     .risk-buttons button{
       flex:1;
       padding:8px 8px;
@@ -364,6 +322,7 @@
       transition:.25s;
       z-index:220;
     }
+
     .toast.show{
       transform:translateY(0);
       opacity:1;
@@ -378,54 +337,23 @@
 
     @media (max-width:560px){
       .container{padding:12px}
-      .topbar-inner{padding:12px}
-      .brand h1{font-size:17px}
-      .brand-mark{width:44px;height:44px;font-size:20px}
-      .hero-copy{padding:18px}
       .card-body{padding:14px}
     }
   </style>
 </head>
 <body>
-  <div class="topbar">
-    <div class="topbar-inner">
-      <div class="brand">
-        <div class="brand-mark">🛡️</div>
-        <div>
-          <h1>Calculadora XAUUSD</h1>
-          <p>Conectada a Google Sheets</p>
-        </div>
-      </div>
-
-      <div class="top-actions">
-        <div class="status-chip online" id="connection-status">Conectando…</div>
-        <div class="status-chip sync" id="sync-status">Sincronización manual</div>
-        <button class="ghost-btn" onclick="manualSync()">Sincronizar ahora</button>
-      </div>
-    </div>
-  </div>
-
   <div class="container">
-    <section class="hero">
-      <div class="hero-copy">
-        <div class="eyebrow">Lot Size Calculator</div>
-        <div class="hero-title">
-          Calculadora de <span>lotaje</span> limpia,
-          conectada al <span>mismo Apps Script</span>
-          y al <span>mismo Google Sheet</span>
-        </div>
-        <div class="status-row">
-          <div class="card-sub">Solo deja activa la parte de cálculo y persistencia de lot settings.</div>
-        </div>
-      </div>
-    </section>
-
     <section class="card">
       <div class="card-body calc-shell">
         <div class="calc-header">
           <div>
-            <div class="calc-title">XAUUSD · Calculadora de lotaje</div>
+            <div class="calc-title">XAUUSD · Calculadora de Lotaje</div>
             <div class="card-sub">Pip value $10 por lote · 1 lote × 10 pips = $100</div>
+            <div class="status-row">
+              <div class="status-chip online" id="connection-status">Conectando…</div>
+              <div class="status-chip sync" id="sync-status">Sincronización manual</div>
+              <button class="ghost-btn" onclick="manualSync()">Sincronizar ahora</button>
+            </div>
           </div>
           <div class="calc-badge">Gold / USD</div>
         </div>
@@ -474,8 +402,8 @@
       { id:'lot4', name:'Calculadora 4', top:'#EF4444', titleColor:'#ef4444', activeBg:'#982B2B', activeText:'#FFD6D6' }
     ];
 
-    const RISKS = [0.25, 0.5, 0.75, 1];
-    const BALANCES = [5000, 10000, 15000, 25000, 50000, 100000, 150000, 200000];
+    const RISKS = [0.1, 0.25, 0.5, 1];
+    const BALANCES = [5000, 10000, 15000, 20000, 50000, 60000, 100000, 200000];
     const PIP_VAL = 10;
 
     let isSyncing = false;
