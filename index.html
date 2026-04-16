@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Calculadora de Lotaje XAUUSD</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;800&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg:#07090f;
+      --panel:#101522;
+      --text:#eaf0ff;
+      --muted:#96a3c4;
+      --gold:#d5b15b;
+      --gold-2:#f0cf82;
+      --green:#16c56d;
+      --green-2:#4be08f;
+      --red:#ef4444;
+      --red-2:#ff7b7b;
+      --blue:#67a5ff;
+      --purple:#9f7aea;
+      --line:rgba(255,255,255,.07);
+      --shadow:0 18px 50px rgba(0,0,0,.35);
+      --radius:20px;
+    }
+
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{
+      font-family:Inter,system-ui,sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(213,177,91,.08), transparent 28%),
+        radial-gradient(circle at bottom right, rgba(103,165,255,.07), transparent 26%),
+        linear-gradient(180deg,#05070b,#0a0e15 45%,#080b12);
+      color:var(--text);
+      min-height:100vh;
+      overflow-x:hidden;
+    }
+    body::before{
+      content:"";
+      position:fixed;
+      inset:0;
+      pointer-events:none;
+      opacity:.14;
+      background-image:
+        linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px);
+      background-size:32px 32px;
+      mask-image:radial-gradient(circle at center, black, transparent 85%);
+    }
+
+    .container{max-width:1280px;margin:0 auto;padding:16px}
+
+    .topbar{
+      position:sticky;
+      top:0;
+      z-index:50;
+      backdrop-filter:blur(16px);
+      background:rgba(7,9,15,.88);
+      border-bottom:1px solid var(--line);
+    }
+    .topbar-inner{
+      max-width:1280px;
+      margin:0 auto;
+      padding:14px 16px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:16px;
+      flex-wrap:wrap;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:14px;
+      min-width:0;
+    }
+    .brand-mark{
+      width:52px;height:52px;border-radius:16px;
+      display:grid;place-items:center;
+      background:linear-gradient(135deg, rgba(213,177,91,.18), rgba(213,177,91,.06));
+      border:1px solid rgba(213,177,91,.22);
+      box-shadow:0 0 0 1px rgba(255,255,255,.03) inset,0 12px 30px rgba(213,177,91,.12);
+      font-size:22px;color:var(--gold-2);
+      flex:0 0 auto;
+    }
+    .brand h1{
+      font-family:Cinzel,serif;
+      font-size:20px;
+      letter-spacing:.03em;
+      color:var(--gold-2);
+      line-height:1.15;
+    }
+    .brand p{
+      font-family:JetBrains Mono,monospace;
+      font-size:10px;
+      letter-spacing:.14em;
+      color:var(--muted);
+      text-transform:uppercase;
+      margin-top:3px;
+    }
+
+    .top-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+
+    .hero{
+      margin:18px 0 16px;
+    }
+    .hero-copy{
+      background:linear-gradient(180deg, rgba(18,23,36,.94), rgba(10,14,22,.98));
+      border:1px solid var(--line);
+      border-radius:24px;
+      box-shadow:var(--shadow);
+      position:relative;
+      padding:22px;
+      overflow:hidden;
+    }
+    .hero-copy::before{
+      content:"";
+      position:absolute;
+      inset:auto -30% -40% auto;
+      width:320px;
+      height:320px;
+      border-radius:50%;
+      background:radial-gradient(circle, rgba(213,177,91,.14), transparent 70%);
+      pointer-events:none;
+    }
+    .eyebrow{
+      font:700 10px JetBrains Mono,monospace;
+      letter-spacing:.16em;
+      text-transform:uppercase;
+      color:var(--gold-2);
+      margin-bottom:10px;
+    }
+    .hero-title{
+      font-family:Cinzel,serif;
+      font-size:clamp(24px,4vw,32px);
+      line-height:1.15;
+      color:#fff;
+    }
+    .hero-title span{color:var(--gold-2)}
+    .card-sub{font-size:13px;color:var(--muted)}
+
+    .status-row{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:16px;
+      align-items:center;
+    }
+    .status-chip{
+      padding:8px 12px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.08);
+      font-size:12px;
+      font-weight:700;
+    }
+    .status-chip.online{
+      background:rgba(22,197,109,.12);
+      color:#baffd8;
+      border-color:rgba(22,197,109,.22);
+    }
+    .status-chip.offline{
+      background:rgba(239,68,68,.12);
+      color:#ffd0d0;
+      border-color:rgba(239,68,68,.22);
+    }
+    .status-chip.sync{
+      background:rgba(103,165,255,.12);
+      color:#d8e9ff;
+      border-color:rgba(103,165,255,.22);
+    }
+
+    .card{
+      background:linear-gradient(180deg, rgba(18,23,36,.95), rgba(12,16,26,.98));
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+    .card-body{padding:18px}
+
+    .calc-shell{display:grid;gap:18px}
+    .calc-header{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+    .calc-title{
+      font-family:Cinzel,serif;
+      font-size:24px;
+      color:var(--gold-2);
+    }
+    .calc-badge{
+      font:700 11px JetBrains Mono,monospace;
+      letter-spacing:.08em;
+      padding:7px 12px;
+      border-radius:999px;
+      background:rgba(213,177,91,.10);
+      border:1px solid rgba(213,177,91,.24);
+      color:var(--gold-2);
+    }
+
+    .calc-global{
+      display:flex;
+      align-items:center;
+      gap:26px;
+      flex-wrap:wrap;
+      padding:18px 20px;
+      border-radius:20px;
+      background:linear-gradient(180deg, rgba(255,255,255,.028), rgba(255,255,255,.012));
+      border:1px solid var(--line);
+    }
+    .big-input{
+      width:120px;
+      font-size:32px;
+      text-align:center;
+      font-weight:800;
+      color:var(--gold-2);
+    }
+    .calc-warn{
+      display:none;
+      font-size:12px;
+      color:#ffd0d0;
+      background:rgba(240,82,82,.10);
+      border:1px solid rgba(240,82,82,.22);
+      padding:8px 12px;
+      border-radius:12px;
+    }
+
+    .pf-input,.ghost-btn,.primary-btn{
+      width:100%;
+      border:none;
+      outline:none;
+      background:rgba(255,255,255,.04);
+      color:var(--text);
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:14px;
+      padding:12px 13px;
+      font-size:14px;
+    }
+    .ghost-btn,.primary-btn{
+      width:auto;
+      cursor:pointer;
+      transition:.2s ease;
+      font-weight:700;
+    }
+    .primary-btn{
+      background:linear-gradient(135deg, rgba(213,177,91,.24), rgba(213,177,91,.12));
+      color:var(--gold-2);
+      border:1px solid rgba(213,177,91,.26);
+    }
+    .ghost-btn{
+      background:rgba(255,255,255,.03);
+      color:var(--text);
+      border:1px solid rgba(255,255,255,.08);
+    }
+    .primary-btn:hover,.ghost-btn:hover{
+      transform:translateY(-1px);
+    }
+
+    select{
+      background:#0f1523;
+      color:#eef3ff;
+    }
+    select option{
+      background:#0f1523;
+      color:#eef3ff;
+    }
+
+    .calc-grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+      gap:14px;
+    }
+
+    .lot-card{
+      background:linear-gradient(180deg, rgba(19,25,38,.98), rgba(13,18,28,.98));
+      border:1px solid var(--line);
+      border-radius:20px;
+      overflow:hidden;
+      box-shadow:var(--shadow);
+    }
+    .lot-head{
+      padding:16px 16px 14px;
+      border-top:3px solid var(--lot-accent);
+    }
+    .lot-head-top{
+      display:flex;
+      justify-content:space-between;
+      gap:8px;
+      align-items:center;
+      margin-bottom:14px;
+    }
+    .lot-title-input{
+      font-weight:800;
+      font-size:18px;
+      background:rgba(255,255,255,.03)!important;
+    }
+
+    .field-group{display:grid;gap:8px}
+    .field-label{
+      font:700 11px JetBrains Mono,monospace;
+      letter-spacing:.1em;
+      color:var(--gold-2);
+      text-transform:uppercase;
+    }
+
+    .lot-output{
+      padding:16px;
+      background:rgba(255,255,255,.025);
+      border-top:1px solid var(--line);
+      text-align:center;
+    }
+    .lot-number{
+      font-size:32px;
+      line-height:1.05;
+      font-weight:800;
+      color:var(--lot-accent);
+      word-break:break-word;
+    }
+    .lot-mini{
+      display:flex;
+      justify-content:center;
+      gap:8px;
+      flex-wrap:wrap;
+      margin-top:12px;
+    }
+    .lot-pill{
+      font-size:12px;
+      padding:5px 10px;
+      border-radius:999px;
+      background:rgba(255,255,255,.05);
+      border:1px solid rgba(255,255,255,.08);
+      color:var(--muted);
+    }
+
+    .risk-buttons{display:flex;gap:6px}
+    .risk-buttons button{
+      flex:1;
+      padding:8px 8px;
+      font-size:12px;
+      min-width:0;
+    }
+
+    .toast{
+      position:fixed;
+      right:16px;
+      bottom:16px;
+      padding:13px 16px;
+      border-radius:16px;
+      background:#0e1525;
+      border:1px solid rgba(31,201,121,.22);
+      color:#bfffd9;
+      box-shadow:var(--shadow);
+      transform:translateY(20px);
+      opacity:0;
+      pointer-events:none;
+      transition:.25s;
+      z-index:220;
+    }
+    .toast.show{
+      transform:translateY(0);
+      opacity:1;
+    }
+
+    @media (max-width:760px){
+      .calc-global{padding:14px}
+      .calc-title{font-size:20px}
+      .lot-number{font-size:28px}
+      .risk-buttons button{padding:7px 6px;font-size:11px}
+    }
+
+    @media (max-width:560px){
+      .container{padding:12px}
+      .topbar-inner{padding:12px}
+      .brand h1{font-size:17px}
+      .brand-mark{width:44px;height:44px;font-size:20px}
+      .hero-copy{padding:18px}
+      .card-body{padding:14px}
+    }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <div class="brand-mark">🛡️</div>
+        <div>
+          <h1>Calculadora XAUUSD</h1>
+          <p>Conectada a Google Sheets</p>
+        </div>
+      </div>
+
+      <div class="top-actions">
+        <div class="status-chip online" id="connection-status">Conectando…</div>
+        <div class="status-chip sync" id="sync-status">Sincronización manual</div>
+        <button class="ghost-btn" onclick="manualSync()">Sincronizar ahora</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <section class="hero">
+      <div class="hero-copy">
+        <div class="eyebrow">Lot Size Calculator</div>
+        <div class="hero-title">
+          Calculadora de <span>lotaje</span> limpia,
+          conectada al <span>mismo Apps Script</span>
+          y al <span>mismo Google Sheet</span>
+        </div>
+        <div class="status-row">
+          <div class="card-sub">Solo deja activa la parte de cálculo y persistencia de lot settings.</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-body calc-shell">
+        <div class="calc-header">
+          <div>
+            <div class="calc-title">XAUUSD · Calculadora de lotaje</div>
+            <div class="card-sub">Pip value $10 por lote · 1 lote × 10 pips = $100</div>
+          </div>
+          <div class="calc-badge">Gold / USD</div>
+        </div>
+
+        <div class="calc-global">
+          <div>
+            <div class="eyebrow" style="margin-bottom:8px">Stop loss global</div>
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+              <input
+                type="number"
+                id="sl-global"
+                class="pf-input big-input"
+                min="25"
+                max="200"
+                value="50"
+                step="5"
+              >
+              <span style="font-size:18px;color:var(--muted)">pips</span>
+            </div>
+          </div>
+
+          <div>
+            <div class="card-sub">Rango válido</div>
+            <div style="font-size:18px;font-weight:800;color:#fff;margin-top:4px">25 – 200 pips</div>
+          </div>
+
+          <div class="calc-warn" id="sl-warn">SL fuera de rango (25–200)</div>
+        </div>
+
+        <div class="calc-grid" id="lot-grid"></div>
+      </div>
+    </section>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const GOOGLE_SHEET_ID = '1_hxP4y0r1DLhqkmd-XMXj2a-RFCjBvT9rpYkAYNvekE';
+    const API_URL = 'https://script.google.com/macros/s/AKfycbwheDzOzoJQqS2T-13kXYh_0B2lS6kqajj4bL5rQoB_BcWn3l0NXfyadZhA84LWdQmN0w/exec';
+    const OFFLINE_CACHE_KEY = 'tshield_calc_offline_cache_v1';
+
+    const LOT_FIRMS = [
+      { id:'lot1', name:'Calculadora 1', top:'#378ADD', titleColor:'#67a5ff', activeBg:'#185FA5', activeText:'#B5D4F4' },
+      { id:'lot2', name:'Calculadora 2', top:'#EFB72A', titleColor:'#f4c84f', activeBg:'#8A6610', activeText:'#FFF0B3' },
+      { id:'lot3', name:'Calculadora 3', top:'#7F77DD', titleColor:'#9f7aea', activeBg:'#534AB7', activeText:'#EEEDFE' },
+      { id:'lot4', name:'Calculadora 4', top:'#EF4444', titleColor:'#ef4444', activeBg:'#982B2B', activeText:'#FFD6D6' }
+    ];
+
+    const RISKS = [0.25, 0.5, 0.75, 1];
+    const BALANCES = [5000, 10000, 15000, 25000, 50000, 100000, 150000, 200000];
+    const PIP_VAL = 10;
+
+    let isSyncing = false;
+
+    const lotState = {};
+    LOT_FIRMS.forEach(f => {
+      lotState[f.id] = {
+        id: f.id,
+        risk: 0.5,
+        balance: 10000,
+        title: f.name
+      };
+    });
+
+    function toast(msg, good = true) {
+      const el = document.getElementById('toast');
+      el.textContent = msg;
+      el.style.borderColor = good ? 'rgba(31,201,121,.25)' : 'rgba(240,82,82,.25)';
+      el.style.color = good ? '#bfffd9' : '#ffd0d0';
+      el.classList.add('show');
+      clearTimeout(window.__toastTimer);
+      window.__toastTimer = setTimeout(() => el.classList.remove('show'), 2500);
+    }
+
+    function setConnectionStatus(text, online = true) {
+      const el = document.getElementById('connection-status');
+      el.textContent = text;
+      el.className = `status-chip ${online ? 'online' : 'offline'}`;
+    }
+
+    function setSyncStatus(text) {
+      document.getElementById('sync-status').textContent = text;
+    }
+
+    function saveOfflineCache() {
+      const payload = {
+        savedAt: new Date().toISOString(),
+        lotCalcSettings: [
+          ...Object.values(lotState).map(s => ({
+            id: s.id,
+            title: s.title,
+            balance: s.balance,
+            risk: s.risk,
+            stopLoss: getSL(),
+            updatedAt: new Date().toISOString()
+          })),
+          {
+            id: 'global',
+            title: 'global',
+            balance: '',
+            risk: '',
+            stopLoss: getSL(),
+            updatedAt: new Date().toISOString()
+          }
+        ]
+      };
+      localStorage.setItem(OFFLINE_CACHE_KEY, JSON.stringify(payload));
+    }
+
+    function getOfflineCache() {
+      try {
+        return JSON.parse(localStorage.getItem(OFFLINE_CACHE_KEY) || '{}');
+      } catch {
+        return {};
+      }
+    }
+
+    function hydrateLotSettings(rows) {
+      LOT_FIRMS.forEach(f => {
+        const row = rows.find(x => x.id === f.id) || {};
+        lotState[f.id] = {
+          id: f.id,
+          risk: Number(row.risk || 0.5),
+          balance: Number(row.balance || 10000),
+          title: row.title || f.name
+        };
+      });
+
+      const globalRow = rows.find(x => x.id === 'global');
+      if (globalRow && globalRow.stopLoss) {
+        const el = document.getElementById('sl-global');
+        if (el) el.value = Number(globalRow.stopLoss || 50);
+      }
+    }
+
+    function hydrateFromOfflineCache() {
+      const cache = getOfflineCache();
+      if (!cache || typeof cache !== 'object') return false;
+      if (!Array.isArray(cache.lotCalcSettings) || !cache.lotCalcSettings.length) return false;
+      hydrateLotSettings(cache.lotCalcSettings);
+      return true;
+    }
+
+    async function apiGet(action) {
+      const res = await fetch(
+        `${API_URL}?action=${encodeURIComponent(action)}&sheetId=${encodeURIComponent(GOOGLE_SHEET_ID)}&t=${Date.now()}`
+      );
+
+      const text = await res.text();
+      let data = {};
+
+      try {
+        data = JSON.parse(text);
+      } catch {
+        throw new Error(`Respuesta no JSON: ${text.slice(0, 200)}`);
+      }
+
+      if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+      if (!data.ok) throw new Error(data.error || 'Error backend GET');
+
+      return data;
+    }
+
+    async function apiPost(payload) {
+      const res = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ ...payload, sheetId: GOOGLE_SHEET_ID })
+      });
+
+      const text = await res.text();
+      let data = {};
+
+      try {
+        data = JSON.parse(text);
+      } catch {
+        throw new Error(`Respuesta no JSON: ${text.slice(0, 200)}`);
+      }
+
+      if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+      if (!data.ok) throw new Error(data.error || 'Error backend POST');
+
+      return data;
+    }
+
+    async function loadRemoteData() {
+      const data = await apiGet('loadAll');
+      hydrateLotSettings(data.lotCalcSettings || []);
+      saveOfflineCache();
+    }
+
+    function buildLotCards() {
+      const grid = document.getElementById('lot-grid');
+
+      grid.innerHTML = LOT_FIRMS.map(f => `
+        <article class="lot-card" style="--lot-accent:${f.top}">
+          <div class="lot-head">
+            <div class="lot-head-top">
+              <input
+                class="pf-input lot-title-input"
+                type="text"
+                id="lot-title-${f.id}"
+                value="${escapeHtml(lotState[f.id].title)}"
+                oninput="setLotTitle('${f.id}', this.value)"
+                onchange="persistLotSetting('${f.id}')"
+                style="color:${f.titleColor}"
+              >
+              <span class="card-sub" id="${f.id}-pct">0.5% riesgo</span>
+            </div>
+
+            <div class="field-group" style="margin-bottom:12px">
+              <label class="field-label">Saldo de cuenta</label>
+              <select class="pf-input" id="bal-${f.id}" onchange="onBalChange('${f.id}', this.value)">
+                ${BALANCES.map(b => `<option value="${b}">$${b.toLocaleString()}</option>`).join('')}
+                <option value="custom">Personalizado...</option>
+              </select>
+              <input
+                class="pf-input"
+                type="number"
+                id="bc-${f.id}"
+                placeholder="Escribe el monto"
+                min="100"
+                step="500"
+                style="display:none"
+                oninput="onCustomBal('${f.id}', this.value)"
+                onchange="persistLotSetting('${f.id}')"
+              >
+            </div>
+
+            <div class="field-group">
+              <label class="field-label">Riesgo por operación</label>
+              <div class="risk-buttons" id="rb-${f.id}">
+                ${RISKS.map(r => `
+                  <button
+                    type="button"
+                    class="ghost-btn"
+                    id="rbtn-${f.id}-${r}"
+                    onclick="setRisk('${f.id}', ${r})"
+                  >${r}%</button>
+                `).join('')}
+              </div>
+            </div>
+          </div>
+
+          <div class="lot-output">
+            <div class="eyebrow" style="margin-bottom:8px">Lotaje</div>
+            <div class="lot-number" id="${f.id}-lot">–</div>
+            <div class="lot-mini">
+              <span class="lot-pill" id="${f.id}-usd">– en riesgo</span>
+              <span class="lot-pill" id="${f.id}-tp2">TP 1:2 → –</span>
+            </div>
+            <div class="card-sub" style="margin-top:10px" id="${f.id}-meta">– pips · $–/pip</div>
+          </div>
+        </article>
+      `).join('');
+
+      LOT_FIRMS.forEach(f => {
+        const state = lotState[f.id];
+        const select = document.getElementById(`bal-${f.id}`);
+        const customInput = document.getElementById(`bc-${f.id}`);
+
+        if (BALANCES.includes(Number(state.balance))) {
+          select.value = String(state.balance);
+          customInput.style.display = 'none';
+        } else {
+          select.value = 'custom';
+          customInput.style.display = 'block';
+          customInput.value = state.balance;
+        }
+
+        setRisk(f.id, state.risk, false);
+      });
+
+      recalcAllLots(false);
+    }
+
+    function escapeHtml(str) {
+      return String(str || '').replace(/[&<>"']/g, s => ({
+        '&':'&amp;',
+        '<':'&lt;',
+        '>':'&gt;',
+        '"':'&quot;',
+        "'":'&#39;'
+      }[s]));
+    }
+
+    function setLotTitle(id, val) {
+      lotState[id].title = val;
+      saveOfflineCache();
+    }
+
+    async function saveLotSetting(id) {
+      const s = lotState[id];
+      await apiPost({
+        action: 'saveLotCalcSetting',
+        setting: {
+          id: s.id,
+          title: s.title,
+          balance: s.balance,
+          risk: s.risk,
+          stopLoss: getSL(),
+          updatedAt: new Date().toISOString()
+        }
+      });
+    }
+
+    async function saveGlobalSL() {
+      await apiPost({
+        action: 'saveLotCalcSetting',
+        setting: {
+          id: 'global',
+          title: 'global',
+          balance: '',
+          risk: '',
+          stopLoss: getSL(),
+          updatedAt: new Date().toISOString()
+        }
+      });
+    }
+
+    async function persistLotSetting(id) {
+      try {
+        await saveLotSetting(id);
+        toast('Configuración guardada');
+      } catch (err) {
+        console.error(err);
+        setConnectionStatus('Modo offline activo', false);
+        toast('Configuración guardada solo offline', false);
+      }
+    }
+
+    async function onBalChange(id, val) {
+      const customInput = document.getElementById('bc-' + id);
+
+      if (val === 'custom') {
+        customInput.style.display = 'block';
+        customInput.focus();
+        return;
+      }
+
+      customInput.style.display = 'none';
+      lotState[id].balance = parseFloat(val);
+      recalcLot(id);
+      saveOfflineCache();
+
+      try {
+        await saveLotSetting(id);
+        toast('Saldo actualizado');
+      } catch (err) {
+        console.error(err);
+        setConnectionStatus('Modo offline activo', false);
+        toast('Saldo guardado solo offline', false);
+      }
+    }
+
+    function onCustomBal(id, val) {
+      const n = parseFloat(val);
+      if (!isNaN(n) && n > 0) {
+        lotState[id].balance = n;
+        recalcLot(id);
+        saveOfflineCache();
+      }
+    }
+
+    async function setRisk(id, risk, persist = true) {
+      lotState[id].risk = risk;
+
+      RISKS.forEach(r => {
+        const btn = document.getElementById(`rbtn-${id}-${r}`);
+        const f = LOT_FIRMS.find(x => x.id === id);
+        const active = r === risk;
+
+        btn.style.background = active ? f.activeBg : 'rgba(255,255,255,.03)';
+        btn.style.color = active ? f.activeText : 'var(--muted)';
+        btn.style.border = `1px solid ${active ? f.activeBg : 'rgba(255,255,255,.08)'}`;
+      });
+
+      recalcLot(id);
+      saveOfflineCache();
+
+      if (persist) {
+        try {
+          await saveLotSetting(id);
+          toast('Riesgo actualizado');
+        } catch (err) {
+          console.error(err);
+          setConnectionStatus('Modo offline activo', false);
+          toast('Riesgo guardado solo offline', false);
+        }
+      }
+    }
+
+    function getSL() {
+      return parseFloat(document.getElementById('sl-global').value) || 50;
+    }
+
+    async function recalcAllLots(persist = true) {
+      const sl = getSL();
+
+      document.getElementById('sl-warn').style.display =
+        (sl < 25 || sl > 200) ? 'block' : 'none';
+
+      LOT_FIRMS.forEach(f => recalcLot(f.id));
+      saveOfflineCache();
+
+      if (persist) {
+        try {
+          await saveGlobalSL();
+        } catch (err) {
+          console.error(err);
+        }
+      }
+    }
+
+    function recalcLot(id) {
+      const sl = getSL();
+      const { balance, risk } = lotState[id];
+      const dr = balance * (risk / 100);
+      const lot = dr / (sl * PIP_VAL);
+
+      document.getElementById(`${id}-lot`).textContent = isFinite(lot) ? lot.toFixed(2) : '0.00';
+      document.getElementById(`${id}-usd`).textContent = `$${dr.toFixed(2)} en riesgo`;
+      document.getElementById(`${id}-tp2`).textContent = `TP 1:2 → $${(dr * 2).toFixed(2)}`;
+      document.getElementById(`${id}-meta`).textContent = `${sl} pips SL · $${(lot * PIP_VAL).toFixed(2)}/pip`;
+      document.getElementById(`${id}-pct`).textContent = `${risk}% riesgo`;
+    }
+
+    async function refreshRemoteAndRender(successMsg) {
+      try {
+        await loadRemoteData();
+        buildLotCards();
+        setConnectionStatus('Conectado a Google Sheets', true);
+        if (successMsg) toast(successMsg);
+      } catch (err) {
+        console.error('SYNC ERROR:', err);
+
+        const hasOffline = hydrateFromOfflineCache();
+        buildLotCards();
+        setConnectionStatus(hasOffline ? 'Modo offline activo' : 'Sin conexión remota', false);
+
+        if (successMsg) toast('No se pudo sincronizar remoto', false);
+      }
+    }
+
+    async function manualSync() {
+      if (isSyncing) return;
+
+      isSyncing = true;
+      setSyncStatus('Sincronizando…');
+
+      try {
+        await refreshRemoteAndRender('Sincronización completada');
+      } finally {
+        isSyncing = false;
+        setSyncStatus('Sincronización manual');
+      }
+    }
+
+    window.addEventListener('online', () => {
+      setConnectionStatus('Conectado a Google Sheets', true);
+      manualSync();
+    });
+
+    window.addEventListener('offline', () => {
+      setConnectionStatus('Modo offline activo', false);
+    });
+
+    document.getElementById('sl-global').addEventListener('input', () => recalcAllLots(false));
+    document.getElementById('sl-global').addEventListener('change', () => recalcAllLots(true));
+
+    (async function init() {
+      try {
+        const hadOffline = hydrateFromOfflineCache();
+        buildLotCards();
+
+        if (hadOffline) {
+          setConnectionStatus('Cargando caché local…', false);
+        } else {
+          setConnectionStatus('Cargando datos…', true);
+        }
+
+        await refreshRemoteAndRender(hadOffline ? 'Sincronizado con remoto' : 'Datos cargados desde Google Sheets');
+      } catch (err) {
+        console.error('INIT ERROR:', err);
+        buildLotCards();
+        setConnectionStatus('Error de carga en este dispositivo', false);
+        toast('La app cargó en modo seguro', false);
+      }
+    })();
+  </script>
+</body>
+</html>
