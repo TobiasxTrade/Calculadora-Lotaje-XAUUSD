@@ -127,6 +127,14 @@
       color:var(--gold-2);
     }
 
+    .partial-input{
+      width:120px;
+      font-size:32px;
+      text-align:center;
+      font-weight:800;
+      color:var(--gold-2);
+    }
+
     .calc-warn{
       display:none;
       font-size:12px;
@@ -238,8 +246,17 @@
       font-size:32px;
       line-height:1.05;
       font-weight:800;
-      color:var(--lot-accent);
+      color:var(--gold-2);
       word-break:break-word;
+    }
+
+    .partial-close-number{
+      font-size:32px;
+      line-height:1.05;
+      font-weight:800;
+      color:var(--gold-2);
+      word-break:break-word;
+      margin-top:8px;
     }
 
     .lot-mini{
@@ -271,6 +288,14 @@
       min-width:0;
     }
 
+    .valid-range{
+      font-size:18px;
+      font-weight:800;
+      color:var(--gold-2);
+      margin-top:4px;
+      font-style:italic;
+    }
+
     .toast{
       position:fixed;
       right:16px;
@@ -297,12 +322,14 @@
       .calc-global{padding:14px}
       .calc-title{font-size:20px}
       .lot-number{font-size:28px}
+      .partial-close-number{font-size:28px}
       .risk-buttons button{padding:7px 6px;font-size:11px}
     }
 
     @media (max-width:560px){
       .container{padding:12px}
       .card-body{padding:14px}
+      .calc-global{gap:16px}
     }
   </style>
 </head>
@@ -326,21 +353,37 @@
                 type="number"
                 id="sl-global"
                 class="pf-input big-input"
-                min="20"
+                min="1"
                 max="500"
                 value="50"
-                step="5"
+                step="1"
               >
               <span style="font-size:18px;color:var(--muted)">pips</span>
             </div>
           </div>
 
           <div>
-            <div class="card-sub">Rango válido</div>
-            <div style="font-size:18px;font-weight:800;color:#fff;margin-top:4px">20 – 500 pips</div>
+            <div class="eyebrow" style="margin-bottom:8px">% parcial</div>
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+              <input
+                type="number"
+                id="partial-percent"
+                class="pf-input partial-input"
+                min="0"
+                max="100"
+                value="50"
+                step="0.1"
+              >
+              <span style="font-size:18px;color:var(--muted)">%</span>
+            </div>
           </div>
 
-          <div class="calc-warn" id="sl-warn">SL fuera de rango (20–500)</div>
+          <div>
+            <div class="card-sub">Rango válido</div>
+            <div class="valid-range">1 – 500 pips</div>
+          </div>
+
+          <div class="calc-warn" id="sl-warn">SL fuera de rango (1–500)</div>
         </div>
 
         <div class="calc-grid" id="lot-grid"></div>
@@ -389,6 +432,7 @@
     function saveOfflineCache() {
       const payload = {
         savedAt: new Date().toISOString(),
+        partialPercent: getPartialPercent(),
         lotCalcSettings: [
           ...Object.values(lotState).map(s => ({
             id: s.id,
@@ -396,6 +440,7 @@
             balance: s.balance,
             risk: s.risk,
             stopLoss: getSL(),
+            partialPercent: getPartialPercent(),
             updatedAt: new Date().toISOString()
           })),
           {
@@ -404,6 +449,7 @@
             balance: '',
             risk: '',
             stopLoss: getSL(),
+            partialPercent: getPartialPercent(),
             updatedAt: new Date().toISOString()
           }
         ]
@@ -431,9 +477,17 @@
       });
 
       const globalRow = rows.find(x => x.id === 'global');
-      if (globalRow && globalRow.stopLoss) {
-        const el = document.getElementById('sl-global');
-        if (el) el.value = Number(globalRow.stopLoss || 50);
+      if (globalRow) {
+        const slEl = document.getElementById('sl-global');
+        const partialEl = document.getElementById('partial-percent');
+
+        if (slEl && globalRow.stopLoss) {
+          slEl.value = Number(globalRow.stopLoss || 50);
+        }
+
+        if (partialEl && globalRow.partialPercent !== undefined && globalRow.partialPercent !== '') {
+          partialEl.value = Number(globalRow.partialPercent || 50);
+        }
       }
     }
 
@@ -441,7 +495,14 @@
       const cache = getOfflineCache();
       if (!cache || typeof cache !== 'object') return false;
       if (!Array.isArray(cache.lotCalcSettings) || !cache.lotCalcSettings.length) return false;
+
       hydrateLotSettings(cache.lotCalcSettings);
+
+      if (cache.partialPercent !== undefined && cache.partialPercent !== null) {
+        const partialEl = document.getElementById('partial-percent');
+        if (partialEl) partialEl.value = Number(cache.partialPercent);
+      }
+
       return true;
     }
 
@@ -549,9 +610,11 @@
           <div class="lot-output">
             <div class="eyebrow" style="margin-bottom:8px">Lotaje</div>
             <div class="lot-number" id="${f.id}-lot">–</div>
+            <div class="partial-close-number" id="${f.id}-partial-lot">–</div>
             <div class="lot-mini">
               <span class="lot-pill" id="${f.id}-usd">– en riesgo</span>
               <span class="lot-pill" id="${f.id}-tp2">TP 1:2 → –</span>
+              <span class="lot-pill" id="${f.id}-partial-label">Cerrar parcial: –</span>
             </div>
             <div class="card-sub" style="margin-top:10px" id="${f.id}-meta">– pips · $–/pip</div>
           </div>
@@ -603,6 +666,7 @@
           balance: s.balance,
           risk: s.risk,
           stopLoss: getSL(),
+          partialPercent: getPartialPercent(),
           updatedAt: new Date().toISOString()
         }
       });
@@ -617,6 +681,7 @@
           balance: '',
           risk: '',
           stopLoss: getSL(),
+          partialPercent: getPartialPercent(),
           updatedAt: new Date().toISOString()
         }
       });
@@ -695,11 +760,15 @@
       return parseFloat(document.getElementById('sl-global').value) || 50;
     }
 
+    function getPartialPercent() {
+      return parseFloat(document.getElementById('partial-percent').value) || 0;
+    }
+
     async function recalcAllLots(persist = true) {
       const sl = getSL();
 
       document.getElementById('sl-warn').style.display =
-        (sl < 20 || sl > 500) ? 'block' : 'none';
+        (sl < 1 || sl > 500) ? 'block' : 'none';
 
       LOT_FIRMS.forEach(f => recalcLot(f.id));
       saveOfflineCache();
@@ -715,15 +784,33 @@
 
     function recalcLot(id) {
       const sl = getSL();
+      const partialPercent = getPartialPercent();
       const { balance, risk } = lotState[id];
+
       const dr = balance * (risk / 100);
       const lot = dr / (sl * PIP_VAL);
+      const partialLot = lot * (partialPercent / 100);
 
-      document.getElementById(`${id}-lot`).textContent = isFinite(lot) ? lot.toFixed(2) : '0.00';
-      document.getElementById(`${id}-usd`).textContent = `$${dr.toFixed(2)} en riesgo`;
-      document.getElementById(`${id}-tp2`).textContent = `TP 1:2 → $${(dr * 2).toFixed(2)}`;
-      document.getElementById(`${id}-meta`).textContent = `${sl} pips SL · $${(lot * PIP_VAL).toFixed(2)}/pip`;
-      document.getElementById(`${id}-pct`).textContent = `${risk}% riesgo`;
+      document.getElementById(`${id}-lot`).textContent =
+        isFinite(lot) ? lot.toFixed(2) : '0.00';
+
+      document.getElementById(`${id}-partial-lot`).textContent =
+        isFinite(partialLot) ? partialLot.toFixed(2) : '0.00';
+
+      document.getElementById(`${id}-usd`).textContent =
+        `$${dr.toFixed(2)} en riesgo`;
+
+      document.getElementById(`${id}-tp2`).textContent =
+        `TP 1:2 → $${(dr * 2).toFixed(2)}`;
+
+      document.getElementById(`${id}-partial-label`).textContent =
+        `Cerrar parcial: ${partialPercent}%`;
+
+      document.getElementById(`${id}-meta`).textContent =
+        `${sl} pips SL · $${(lot * PIP_VAL).toFixed(2)}/pip`;
+      
+      document.getElementById(`${id}-pct`).textContent =
+        `${risk}% riesgo`;
     }
 
     async function refreshRemoteAndRender(successMsg) {
@@ -741,6 +828,9 @@
 
     document.getElementById('sl-global').addEventListener('input', () => recalcAllLots(false));
     document.getElementById('sl-global').addEventListener('change', () => recalcAllLots(true));
+
+    document.getElementById('partial-percent').addEventListener('input', () => recalcAllLots(false));
+    document.getElementById('partial-percent').addEventListener('change', () => recalcAllLots(true));
 
     (async function init() {
       try {
