@@ -242,21 +242,38 @@
       text-align:center;
     }
 
+    .lot-values{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+      align-items:stretch;
+      margin-top:6px;
+    }
+
+    .lot-box{
+      background:rgba(255,255,255,.035);
+      border:1px solid rgba(255,255,255,.07);
+      border-radius:16px;
+      padding:14px 10px;
+      display:grid;
+      gap:8px;
+      align-items:center;
+      justify-items:center;
+    }
+
+    .lot-box-label{
+      font:700 10px JetBrains Mono,monospace;
+      letter-spacing:.14em;
+      text-transform:uppercase;
+      color:var(--muted);
+    }
+
     .lot-number{
       font-size:32px;
       line-height:1.05;
       font-weight:800;
       color:var(--gold-2);
       word-break:break-word;
-    }
-
-    .partial-close-number{
-      font-size:32px;
-      line-height:1.05;
-      font-weight:800;
-      color:var(--gold-2);
-      word-break:break-word;
-      margin-top:8px;
     }
 
     .lot-mini{
@@ -322,7 +339,6 @@
       .calc-global{padding:14px}
       .calc-title{font-size:20px}
       .lot-number{font-size:28px}
-      .partial-close-number{font-size:28px}
       .risk-buttons button{padding:7px 6px;font-size:11px}
     }
 
@@ -330,6 +346,7 @@
       .container{padding:12px}
       .card-body{padding:14px}
       .calc-global{gap:16px}
+      .lot-values{grid-template-columns:1fr}
     }
   </style>
 </head>
@@ -609,13 +626,25 @@
 
           <div class="lot-output">
             <div class="eyebrow" style="margin-bottom:8px">Lotaje</div>
-            <div class="lot-number" id="${f.id}-lot">–</div>
-            <div class="partial-close-number" id="${f.id}-partial-lot">–</div>
+
+            <div class="lot-values">
+              <div class="lot-box">
+                <div class="lot-box-label">Lot Total</div>
+                <div class="lot-number" id="${f.id}-lot">–</div>
+              </div>
+
+              <div class="lot-box">
+                <div class="lot-box-label">Parcial</div>
+                <div class="lot-number" id="${f.id}-partial-lot">–</div>
+              </div>
+            </div>
+
             <div class="lot-mini">
               <span class="lot-pill" id="${f.id}-usd">– en riesgo</span>
               <span class="lot-pill" id="${f.id}-tp2">TP 1:2 → –</span>
               <span class="lot-pill" id="${f.id}-partial-label">Cerrar parcial: –</span>
             </div>
+
             <div class="card-sub" style="margin-top:10px" id="${f.id}-meta">– pips · $–/pip</div>
           </div>
         </article>
@@ -808,7 +837,7 @@
 
       document.getElementById(`${id}-meta`).textContent =
         `${sl} pips SL · $${(lot * PIP_VAL).toFixed(2)}/pip`;
-      
+
       document.getElementById(`${id}-pct`).textContent =
         `${risk}% riesgo`;
     }
